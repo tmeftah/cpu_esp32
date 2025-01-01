@@ -318,3 +318,48 @@ void displayData(String data) {
   - Each data segment is handled accordingly, with CPU usage and battery level additionally being visualized through progress bars on the display.
 - **Display Functionality**: The `displayData` function clears the screen, renders the data, and toggles a simple on-screen indicator for visual confirmation that the display is being updated.
 - **Visual Output**: Information such as CPU usage and network usage is rendered to the OLED display, thus providing real-time feedback from the incoming data. The functionality also includes a visual indicator to show the current state in successive loops.
+
+---
+
+## Bash Script
+
+This Bash script is designed to monitor and report system statistics from a Linux computer to an ESP32 device over a serial connection. Here's a detailed breakdown of its functionalities:
+
+### Constants and Commands
+
+- **BAUD_RATE=115200**: Sets the baud rate for serial communication to 115200 bps.
+
+### Helper Functions
+
+- **get_network_interface()**: Identifies the primary network interface by inspecting the default route using the `ip` command.
+- **get_ip_address()**: Retrieves the IPv4 address of the identified network interface using the `ip` command.
+
+- **get_device_path()**: Checks for connected USB or ACM devices. Typically, ESP32 boards connect via `/dev/ttyUSB*` or `/dev/ttyACM*`.
+
+- **get_cpu_usage()**: Calculates CPU usage by reading `/proc/stat` twice, a second apart, then computes the usage percentage based on the change in time spent idle versus total time.
+
+- **get_network_usage()**: Measures the network usage over a 1-second interval. It reads received and transmitted bytes from `/sys/class/net/<interface>/statistics/rx_bytes` and `tx_bytes`, respectively, and calculates the KB/s rate.
+
+- **get_battery_level()**: Gets the battery percentage using `upower`. It lists power devices, filters for batteries, and extracts the percentage.
+
+### Execution
+
+1. **Display IP Address**: Outputs the system's current IP address.
+2. **Main Loop**:
+   - **Device Detection**: Continually checks if an ESP32 is connected via the `get_device_path` function.
+   - **Configuration**: If a device is detected, the serial communication settings are configured using `stty`.
+   - **Message Preparation and Transmission**:
+     - Gathers CPU usage, IP address, network usage, and battery level.
+     - Formats this information into a message.
+     - Sends the message to the ESP32 device over serial.
+   - **ESP32 Not Connected**: If no device is detected, the script notifies and retries after a brief pause.
+3. **Loop Sleep**: Pauses for a second between iterations to reduce resource usage.
+
+### Use-Cases and Limitations
+
+- **Use-Cases**: This script can be useful for monitoring system health and relaying this information to an ESP32, possibly for remote monitoring or logging.
+- **Limitations**:
+  - Assumes the ESP32 device is always the only connected device appearing as `/dev/ttyUSB*` or `/dev/ttyACM*`.
+  - The `upower` command may not suit systems lacking battery management (e.g., desktop setups).
+  - Network usage calculations assume a 1-second polling rate, which might not be precise under different load conditions.
+  - Assumes the user has the necessary permissions to access serial ports and read from system files.
