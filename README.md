@@ -1,3 +1,7 @@
+# CPU_LCD_ESP32
+
+![Alt text](image.jpg)
+
 To run a `.sh` script as a service on Ubuntu, you can create a `systemd` service file. Here is a step-by-step guide to accomplish this:
 
 ### Step 1: Prepare Your Script
